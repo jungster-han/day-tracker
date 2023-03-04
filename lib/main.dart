@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
     DaysinceDetail('Days since we ate out', DateTime(2023, 02, 28)),
   ];
 
-  void updateTrackList(DaysinceDetail newDaysince) {
+  void addToTrackList(DaysinceDetail newDaysince) {
     setState(() {
       deets = [...deets, newDaysince];
     });
@@ -58,24 +58,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget addNewDaysince() => AddNewDaysinceDialog();
+    Widget addNewDaysince() =>
+        AddNewDaysinceDialog(addToTrackList: addToTrackList);
 
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: deets.length,
-              itemBuilder: (_, index) => DaysinceSummaryCard(
-                detail: deets[index],
+      body: Padding(
+        padding: const EdgeInsets.only(top: 50, bottom: 50),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: deets.length,
+                itemBuilder: (_, index) => DaysinceSummaryCard(
+                  detail: deets[index],
+                ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog(
-            context: context, builder: (context) => addNewDaysince()),
+            barrierDismissible: false,
+            context: context,
+            builder: (context) => addNewDaysince()),
         tooltip: 'Add a day to track from',
         child: const Icon(Icons.add),
       ),
