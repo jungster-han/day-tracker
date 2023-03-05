@@ -1,18 +1,22 @@
+import 'package:daysince/db/daysince_db.dart';
 import 'package:daysince/models/daysince_detail.model.dart';
 import 'package:flutter/material.dart';
 
-class AddNewDaysinceDialog extends StatefulWidget {
-  final Function addToTrackList;
-  const AddNewDaysinceDialog({super.key, required this.addToTrackList});
-
+class EditDaysinceDialog extends StatefulWidget {
+  DaysinceDetail detail;
+  EditDaysinceDialog({super.key, required this.detail});
   @override
-  State<AddNewDaysinceDialog> createState() => _AddNewDaysinceDialog();
+  State<EditDaysinceDialog> createState() => _EditDaysinceDialog();
 }
 
-class _AddNewDaysinceDialog extends State<AddNewDaysinceDialog> {
-  DateTime selectedDate = DateTime.now();
-
+class _EditDaysinceDialog extends State<EditDaysinceDialog> {
   final descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    descriptionController.text = widget.detail.description;
+  }
 
   @override
   void dispose() {
@@ -22,8 +26,19 @@ class _AddNewDaysinceDialog extends State<AddNewDaysinceDialog> {
   }
 
   final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
+    DateTime selectedDate = widget.detail.startingDate;
+
+    Future updateDaysince() async {
+      final daysince = widget.detail.copy(
+          id: widget.detail.id,
+          description: descriptionController.text,
+          startingDate: selectedDate);
+      await DaysinceDatabase.instance.updateDaysince(daysince);
+    }
+
     return Form(
       key: _formKey,
       child: Dialog(
@@ -80,16 +95,12 @@ class _AddNewDaysinceDialog extends State<AddNewDaysinceDialog> {
                     child: const Text('Cancel')),
                 ElevatedButton(
                     onPressed: () {
-                      DateTime now = DateTime.now();
-
                       if (_formKey.currentState!.validate()) {
-                        widget.addToTrackList(DaysinceDetail(
-                            description: descriptionController.text,
-                            startingDate: selectedDate));
+                        updateDaysince();
                         Navigator.pop(context);
                       }
                     },
-                    child: const Text('Add'))
+                    child: const Text('Update'))
               ],
             ),
           )

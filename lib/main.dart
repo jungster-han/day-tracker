@@ -1,3 +1,4 @@
+import 'package:daysince/db/daysince_db.dart';
 import 'package:daysince/models/daysince_detail.model.dart';
 import 'package:daysince/widgets/cards/daysince_summary_card.dart';
 import 'package:daysince/widgets/dialogs/add_new_daysince.dialog.dart';
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.deepOrange,
+        primarySwatch: Colors.indigo,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -45,14 +46,37 @@ class _MyHomePageState extends State<MyHomePage> {
   // option of days since,
   // time since, (year, month, days, hours, minutes, seconds)
   // hours since,
-  List<DaysinceDetail> deets = <DaysinceDetail>[
-    DaysinceDetail('Days since we met', DateTime(2021, 05, 05)),
-    DaysinceDetail('Days since we ate out', DateTime(2023, 02, 28)),
-  ];
+  late List<DaysinceDetail> daysinces;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    refresh();
+  }
+
+  Future refresh() async {
+    setState(() => isLoading = true);
+    daysinces = await DaysinceDatabase.instance.getAllDaysince();
+    setState(() => isLoading = false);
+  }
 
   void addToTrackList(DaysinceDetail newDaysince) {
     setState(() {
-      deets = [...deets, newDaysince];
+      daysinces = [...daysinces, newDaysince];
+    });
+  }
+
+  void deleteFromTrackList(id) {
+    setState(() {
+      daysinces.removeWhere((item) => item.id == id);
+    });
+  }
+
+  void updateTrackList(daysince) {
+    setState(() {
+      daysinces[daysinces.indexWhere((element) => element.id == daysince.id)] =
+          daysince;
     });
   }
 
@@ -68,9 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               child: ListView.builder(
-                itemCount: deets.length,
+                itemCount: daysinces.length,
                 itemBuilder: (_, index) => DaysinceSummaryCard(
-                  detail: deets[index],
+                  detail: daysinces[index],
                 ),
               ),
             )
