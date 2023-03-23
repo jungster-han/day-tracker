@@ -1,22 +1,20 @@
-import 'package:daysince/db/daysince_db.dart';
-import 'package:daysince/models/daysince_detail.model.dart';
+import 'package:daysince/db/daysince.db.dart';
+import 'package:daysince/models/daysince.model.dart';
 import 'package:flutter/material.dart';
 
-class EditDaysinceDialog extends StatefulWidget {
-  DaysinceDetail detail;
-  EditDaysinceDialog({super.key, required this.detail});
+class AddNewDaysinceDialog extends StatefulWidget {
+  final Function refreshNotes;
+
+  const AddNewDaysinceDialog({super.key, required this.refreshNotes});
+
   @override
-  State<EditDaysinceDialog> createState() => _EditDaysinceDialog();
+  State<AddNewDaysinceDialog> createState() => _AddNewDaysinceDialog();
 }
 
-class _EditDaysinceDialog extends State<EditDaysinceDialog> {
-  final descriptionController = TextEditingController();
+class _AddNewDaysinceDialog extends State<AddNewDaysinceDialog> {
+  DateTime selectedDate = DateTime.now();
 
-  @override
-  void initState() {
-    super.initState();
-    descriptionController.text = widget.detail.description;
-  }
+  final descriptionController = TextEditingController();
 
   @override
   void dispose() {
@@ -27,18 +25,14 @@ class _EditDaysinceDialog extends State<EditDaysinceDialog> {
 
   final _formKey = GlobalKey<FormState>();
 
+  void addNewDaysince(String description, DateTime startDate) async {
+    await DaysinceDatabase.instance
+        .create(Daysince(description: description, startDate: startDate));
+    widget.refreshNotes();
+  }
+
   @override
   Widget build(BuildContext context) {
-    DateTime selectedDate = widget.detail.startingDate;
-
-    Future updateDaysince() async {
-      final daysince = widget.detail.copy(
-          id: widget.detail.id,
-          description: descriptionController.text,
-          startingDate: selectedDate);
-      await DaysinceDatabase.instance.updateDaysince(daysince);
-    }
-
     return Form(
       key: _formKey,
       child: Dialog(
@@ -66,6 +60,9 @@ class _EditDaysinceDialog extends State<EditDaysinceDialog> {
                 Text(
                     '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}'),
                 ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 45.0),
+                    ),
                     child: const Text('Select a Date'),
                     onPressed: () async {
                       DateTime? newDate = await showDatePicker(
@@ -87,6 +84,7 @@ class _EditDaysinceDialog extends State<EditDaysinceDialog> {
               children: [
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 45.0),
                       backgroundColor: Colors.blueGrey,
                     ),
                     onPressed: () {
@@ -94,13 +92,17 @@ class _EditDaysinceDialog extends State<EditDaysinceDialog> {
                     },
                     child: const Text('Cancel')),
                 ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 45.0),
+                    ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        updateDaysince();
+                        addNewDaysince(
+                            descriptionController.text, selectedDate);
                         Navigator.pop(context);
                       }
                     },
-                    child: const Text('Update'))
+                    child: const Text('Add'))
               ],
             ),
           )

@@ -40,6 +40,8 @@ dependencies:
   sqflite: ^2.2.5
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.12.0"
+
   flutter_test:
     sdk: flutter
 
@@ -50,6 +52,10 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
 
+flutter_icons:
+  android: "launcher_icon"
+  remove_alpha_ios: true
+  image_path: "assets/icons/D.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
